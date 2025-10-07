@@ -1,0 +1,33 @@
+table Customer
+	lineageTag: 481a40c0-a289-4176-bac4-65911c7732c9
+
+	column Cust_Nbr
+		dataType: string
+		lineageTag: 442a4468-19c3-4d91-a9a6-8b978dba2bd4
+		summarizeBy: none
+		sourceColumn: Cust_Nbr
+
+		annotation SummarizationSetBy = Automatic
+
+	column Name
+		dataType: string
+		lineageTag: 836cad97-13d7-4081-9555-beddadcd47d2
+		summarizeBy: none
+		sourceColumn: Name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Customer = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases(Server),
+				    ReportPBI = Source{[Name="ReportPBI"]}[Data],
+				    dbo_vw_Customer = ReportPBI{[Schema="dbo",Item="vw_Customer"]}[Data]
+				in
+				    dbo_vw_Customer
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

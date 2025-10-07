@@ -1,0 +1,114 @@
+table Date
+	lineageTag: 25de524f-bd9b-4909-8bc4-53c1f735a45f
+
+	column Date
+		formatString: General Date
+		lineageTag: b5204a00-66b6-49b4-ac83-7c59d9eb85a9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNumber
+		formatString: 0
+		lineageTag: bd503cfb-aedd-481c-9a07-3902969f80c9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthNumber]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		lineageTag: ed5da5c3-4e39-4544-8824-70d829a21f53
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month]
+		sortByColumn: MonthNumber
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		formatString: 0
+		lineageTag: 0227a744-5b61-4225-9e5f-5d395c53407d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		formatString: 0
+		lineageTag: a92b1076-7edc-4b2d-8f0b-0341399617d3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateMoM
+		lineageTag: f5cef50e-93d8-4c9b-aa8d-f9ca937110c7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [DateMoM]
+		sortByColumn: MonthNumber
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateYoY
+		lineageTag: 6cd06d3c-981b-472d-a5e8-9ce6844b6e68
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [DateYoY]
+
+		annotation SummarizationSetBy = Automatic
+
+	column PrevMonth
+		lineageTag: e2bebfbd-e61f-4612-a9b7-ca3880b4146d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [PrevMonth]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Date = calculated
+		mode: import
+		source =
+				VAR _cal = CALENDARAUTO()
+				        RETURN
+				            ADDCOLUMNS(_cal,
+				                "MonthNumber", MONTH([Date]),
+				                "Month", FORMAT([Date], "mmm"),
+				                "PrevMonth", FORMAT(EOMONTH([Date], -1), "mmm"),
+				                "Quarter", QUARTER([Date]),
+				                "Year", YEAR([Date]),
+				                "DateMoM", SWITCH(TRUE(),
+				                        MONTH([Date]) = 1, "Jan",
+				                        MONTH([Date]) = 2, "Feb - Jan",
+				                        MONTH([Date]) = 3, "Mar - Feb",
+				                        MONTH([Date]) = 4, "Apr - Mar",
+				                        MONTH([Date]) = 5, "May - Apr",
+				                        MONTH([Date]) = 6, "Jun - May",
+				                        MONTH([Date]) = 7, "Jul - Jun",
+				                        MONTH([Date]) = 8, "Aug - Jul",
+				                        MONTH([Date]) = 9, "Sep - Aug",
+				                        MONTH([Date]) = 10, "Oct - Sep",
+				                        MONTH([Date]) = 11, "Nov - Oct",
+				                        "Dec"),
+				                "DateYoY", SWITCH(TRUE(),
+				                        MONTH([Date]) = 1, "Jan, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 2, "Feb, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 3, "Ma, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 4, "Apr, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 5, "May, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 6, "Jun, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 7, "Jul, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 8, "Aug, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 9, "Sep, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 10, "Oct, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        MONTH([Date]) = 11, "Nov, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
+				                        "Dec, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"))
+				            )
+
+	annotation PBI_Id = acaed7cd0d0945e1a69e5234b02a24d3
+

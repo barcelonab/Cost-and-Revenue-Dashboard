@@ -1,0 +1,8 @@
+relationship AutoDetected_3d1a0db7-ef89-431c-8c29-62d8a5ea69c6
+	fromColumn: Sales.Cust_Nbr
+	toColumn: Customer.Cust_Nbr
+
+relationship a8e8ba03-67aa-5a3d-cc0f-a7bb59f0c8c7
+	fromColumn: Sales.So_Date
+	toColumn: Date.Date
+

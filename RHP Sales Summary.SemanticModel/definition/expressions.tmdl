@@ -1,0 +1,21 @@
+expression Server = "RHP-D-FWKKK74\SQLPBI" meta [IsParameterQuery=true, Type="Any", IsParameterQueryRequired=true]
+	lineageTag: 4eba95ac-361d-4bd2-909d-b29428bdb04d
+
+	annotation PBI_ResultType = Text
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression RangeStart = #datetime(2024, 1, 1, 12, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: 82469a7b-f9a6-469e-af2c-d57fd0ed6eba
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+
+expression RangeEnd = #datetime(2025, 12, 31, 12, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: da1a88f9-a89a-46b0-8cd8-ca3b631801dc
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+

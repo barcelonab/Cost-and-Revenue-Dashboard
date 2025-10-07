@@ -1,0 +1,49 @@
+table 'List of Year'
+	lineageTag: 21558be7-31da-450f-bcf7-62e230aadd31
+
+	column Year
+		formatString: 0
+		lineageTag: 339b6ab2-ca76-440a-99a7-d4cadee7c8d6
+		summarizeBy: sum
+		sourceColumn: [Value1]
+		sortByColumn: 'Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Fields'
+		isHidden
+		lineageTag: 0c078208-cc5d-4cdd-873e-d7b3fcef185e
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Order'
+		isHidden
+		formatString: 0
+		lineageTag: 3c40eb84-b422-4a3d-920b-57b148a68cfa
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'List of Year' = calculated
+		mode: import
+		source =
+				{
+				    ((YEAR(TODAY()) - 1), NAMEOF('_Measures'[Sales Last Year]), 0),
+				    (YEAR(TODAY()), NAMEOF('_Measures'[Sales This Year]), 1)
+				}
+
+	annotation PBI_Id = 8f0d6dd25a3645c3b47af3d908a48944
+

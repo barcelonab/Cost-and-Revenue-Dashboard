@@ -1,0 +1,211 @@
+table _Measures
+	lineageTag: a3200b60-f7d3-4a4c-ac3b-b9bfd7c7ad23
+
+	measure 'Total Sales' = SUM(Sales[Sales Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales
+		lineageTag: b27d0047-7db3-4a49-a5a6-17f39146b55d
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Grand Total Sales' = CALCULATE([Total Sales], ALL(Sales), YEAR('Date'[Date]) = YEAR(TODAY()))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales
+		lineageTag: 1c627af0-8d4f-45a7-b858-3478081d216f
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Profit' = SUM(Sales[Profit])
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Profit
+		lineageTag: c57d5876-702a-488d-ae39-48d804c22898
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Grand Total Profit' = CALCULATE([Total Profit], ALL(Sales), YEAR('Date'[Date]) = YEAR(TODAY()))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Profit
+		lineageTag: 4629f8b0-58db-4b60-abf1-d11cefdf0c14
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Cost' = sum(Sales[Cost])
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Cost
+		lineageTag: f3241fc1-cf4a-458b-a222-5ca3858d9bb2
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Grand Total Cost' = CALCULATE([Total Cost], ALL(Sales), YEAR('Date'[Date]) = YEAR(TODAY()))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Cost
+		lineageTag: 2b62bbbb-fb29-41bf-9faa-ec4734412f71
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Order' = DISTINCTCOUNT(Sales[So_Nbr])
+		formatString: #,0
+		displayFolder: Order
+		lineageTag: cebfe0d4-b50a-4b91-b071-f0c6daaf245d
+
+	measure 'Grand Total Order' = CALCULATE([Total Order], ALL(Sales), YEAR('Date'[Date]) = YEAR(TODAY()))
+		formatString: #,0
+		displayFolder: Order
+		lineageTag: 9a553d40-7ca1-4ed3-98a3-dac698aa3250
+
+	measure '% Total Cost' = ```
+			VAR _cost =  DIVIDE([Total Cost], [Grand Total Cost])
+			                RETURN
+			                    CONCATENATE(IF(_cost > 0.10, "⬆️ ", "⬇️ "),FORMAT(_cost, "#.00%;(-#.00%)"))  
+			```
+		displayFolder: Cost
+		lineageTag: 35d4c85a-de58-480a-8ba7-d93b11b5f95d
+
+	measure '% Total Sales' =
+			VAR _sales =  DIVIDE([Total Sales], [Grand Total Sales])
+			                RETURN
+			                    CONCATENATE(IF(_sales > 0.10, "⬆️ ", "⬇️ "), FORMAT(_sales, "#.00%;(-#.00%)"))
+		displayFolder: Sales
+		lineageTag: cef0ac5c-d657-4da4-adc6-e62674279cb6
+
+	measure '% Total Profit' = ```
+			VAR _profit =  DIVIDE([Total Profit], [Grand Total Profit])
+			                RETURN
+			                    CONCATENATE(IF(_profit > 0.10, "⬆️ ", "⬇️ "), FORMAT(_profit, "#.00%;(-#.00%)"))  
+			```
+		displayFolder: Profit
+		lineageTag: e41cdf6c-65cb-48cd-88b0-76ca9f719851
+
+	measure '% Total Order' = ```
+			VAR _order =  DIVIDE([Total Order], [Grand Total Order])
+			                RETURN
+			                    CONCATENATE(IF(_order > 0.10, "⬆️ ", "⬇️ "), FORMAT(_order, "#.00%;(-#.00%)"))  
+			```
+		displayFolder: Order
+		lineageTag: fc4e1ba6-e5ec-4359-aeac-04a15045fe56
+
+	measure 'Total Cost Color' =
+			VAR _cost =  DIVIDE([Total Cost], [Grand Total Cost])
+			                RETURN
+			                    IF(_cost > 0.10, "Green", "Red")
+		displayFolder: Cost
+		lineageTag: 2fb358c0-a8db-4353-a318-dce5f9533cef
+
+	measure 'Total Order Color' =
+			VAR _order =  DIVIDE([Total Order], [Grand Total Order])
+			                RETURN
+			                    IF(_order > 0.10, "Green", "Red")
+		displayFolder: Order
+		lineageTag: 8210c51a-4f4a-442f-bdad-4bb9b6091897
+
+	measure 'Total Profit Color' =
+			VAR _profit =  DIVIDE([Total Profit], [Grand Total Profit])
+			                RETURN
+			                    IF(_profit > 0.10, "Green", "Red")
+		displayFolder: Profit
+		lineageTag: 52733098-6151-42ce-8db0-cc2a6a0a023c
+
+	measure 'Total Sales Color' =
+			VAR _sales =  DIVIDE([Total Sales], [Grand Total Sales])
+			                RETURN
+			                    IF(_sales > 0.10, "Green", "Red")
+		displayFolder: Sales
+		lineageTag: 675f12f4-eb58-4da2-b8a6-cf36e4c114df
+
+	measure MoM = IF(NOT (ISBLANK([Previous Month Sales])), FORMAT([Total Sales] - [Previous Month Sales], "$#,#00;(-$#,#00)"))
+		displayFolder: MoM
+		lineageTag: 2c8dcc4b-b005-4e8c-94c1-8acc668503ac
+
+	measure 'Previous Month Sales' =
+			IF(NOT (ISBLANK([Total Sales]))
+			                            ,CALCULATE([Total Sales]
+			                            ,PREVIOUSMONTH('Date'[Date]))
+			                        )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: MoM
+		lineageTag: ed9cc2d8-bf67-4c73-921f-2c5cc1155383
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure '% Previous Month' = ```
+			VAR _prev =  DIVIDE([Total Sales] - [Previous Month Sales], [Previous Month Sales])
+			                RETURN
+			                    IF (NOT (ISBLANK([Previous Month Sales])),
+			                        IF(_prev > 0, 
+			                            "⬆️ " & FORMAT(_prev, "#.00%;(-#.00%)") ,
+			                            "⬇️ " & FORMAT(_prev, "#.00%;(-#.00%)")
+			                        )
+			                    )
+			```
+		displayFolder: MoM
+		lineageTag: a92e949a-3eb0-4ed3-959f-d1de07368d70
+
+	measure 'Previous Month Color' = ```
+			VAR _prev =  DIVIDE([Total Sales] - [Previous Month Sales], [Previous Month Sales])
+			                RETURN
+			                    IF(NOT (ISBLANK([Previous Month Sales])), 
+			                        IF(_prev > 0, "Green", "Red")
+			                    )
+			```
+		displayFolder: MoM
+		lineageTag: a5654769-5265-401b-a7b1-94750fead086
+
+	measure 'Current Month Label' = ```
+			IF(NOT (ISBLANK([Previous Month Sales])), 
+			                SELECTEDVALUE('Date'[Month]) & ": "
+			                )
+			```
+		displayFolder: MoM
+		lineageTag: 51bc92c4-3c21-464e-91ee-8951bdcff1a0
+
+	measure 'Previous Month Label' =
+			IF(NOT (ISBLANK([Previous Month Sales])),
+			                        SELECTEDVALUE('Date'[PrevMonth]) & ": "
+			                )
+		displayFolder: MoM
+		lineageTag: 3cf87e51-2afa-4c01-a57f-a5480f6c42fe
+
+	measure 'Sales Last Year' = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: YoY
+		lineageTag: 1baed34c-a44f-42f2-a753-1664099eafbf
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Sales This Year' = CALCULATE([Total Sales], 'Date'[Year] = YEAR(TODAY()))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: YoY
+		lineageTag: 9368a29e-23e8-411c-a54e-ccead0e9f8ea
+
+	measure 'Sales Difference YoY' = FORMAT([Sales This Year] - [Sales Last Year], "$#,#00;$-#,#00")
+		displayFolder: YoY
+		lineageTag: 817a9a80-9892-4300-9357-ed8e9110abf1
+
+	measure 'Current Year Color' =
+			VAR _prevyear = [Sales This Year] - [Sales Last Year]
+			                    RETURN
+			                        IF(NOT(ISBLANK([Sales This Year])),
+			                        IF( _prevyear >= 0, "Green", "Red"))
+		displayFolder: YoY
+		lineageTag: a403463c-87d2-42e3-be44-fb4875bd87dc
+
+	measure 'Color of Difference' = [Sales This Year] - [Sales Last Year]
+		displayFolder: YoY
+		lineageTag: 7ddee2e2-c046-466e-ba2e-a8e7b7d54a3f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
