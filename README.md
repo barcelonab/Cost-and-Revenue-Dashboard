@@ -29,6 +29,7 @@
 - Add System DSN using U2 64-bit ODBC Driver
 - Enter your credentials including your Database, User and Password.
 - Test the connection and click ok.
+- Test the connection and click ok.
   
   <img width="598" height="429" alt="image" src="https://github.com/user-attachments/assets/c51a56fe-43a0-46d7-b2b5-0c4cdf07731f" />
 
