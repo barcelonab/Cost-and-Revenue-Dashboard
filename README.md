@@ -1,4 +1,3 @@
-# Sales-Summary-Report
 **This is the first project I developed in my current role. It presents the monthly total revenue, costs and income together with product and customer data to highlight the top performers. Most of the products are seasonal, including BBQ grills and accessories for summer season and heaters, fireplaces, and logs for winter.**
 
 **My Analysis Provided the following**
