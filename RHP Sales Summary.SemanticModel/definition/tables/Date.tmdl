@@ -94,7 +94,7 @@ table Date
 				                        MONTH([Date]) = 9, "Sep - Aug",
 				                        MONTH([Date]) = 10, "Oct - Sep",
 				                        MONTH([Date]) = 11, "Nov - Oct",
-				                        "Dec"),
+				                        "Dec-Nov"),
 				                "DateYoY", SWITCH(TRUE(),
 				                        MONTH([Date]) = 1, "Jan, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),
 				                        MONTH([Date]) = 2, "Feb, " & FORMAT(YEAR(TODAY()) - 1 & " - " & YEAR(TODAY()), "General"),

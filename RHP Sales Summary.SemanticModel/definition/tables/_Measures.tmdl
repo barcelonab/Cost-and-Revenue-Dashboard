@@ -112,15 +112,25 @@ table _Measures
 		displayFolder: Sales
 		lineageTag: 675f12f4-eb58-4da2-b8a6-cf36e4c114df
 
-	measure MoM = IF(NOT (ISBLANK([Previous Month Sales])), FORMAT([Total Sales] - [Previous Month Sales], "$#,#00;(-$#,#00)"))
+	measure MoM = ```
+			
+			IF(ISFILTERED('Date'[Month]) || ISFILTERED('Date'[DateMoM]),
+			    FORMAT([Total Sales] - [Previous Month Sales], 
+			            "$#,#00;(-$#,#00)"),
+			    BLANK()
+			)
+			```
 		displayFolder: MoM
 		lineageTag: 2c8dcc4b-b005-4e8c-94c1-8acc668503ac
 
 	measure 'Previous Month Sales' =
-			IF(NOT (ISBLANK([Total Sales]))
-			                            ,CALCULATE([Total Sales]
-			                            ,PREVIOUSMONTH('Date'[Date]))
-			                        )
+			
+			IF(ISFILTERED('Date'[Month]) || ISFILTERED('Date'[DateMoM]),
+			            CALCULATE([Total Sales]
+			                    ,PREVIOUSMONTH('Date'[Date])
+			                    ),
+			            BLANK()
+			    )
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		displayFolder: MoM
 		lineageTag: ed9cc2d8-bf67-4c73-921f-2c5cc1155383
@@ -150,18 +160,21 @@ table _Measures
 		displayFolder: MoM
 		lineageTag: a5654769-5265-401b-a7b1-94750fead086
 
-	measure 'Current Month Label' = ```
-			IF(NOT (ISBLANK([Previous Month Sales])), 
-			                SELECTEDVALUE('Date'[Month]) & ": "
-			                )
-			```
+	measure 'Current Month Label' =
+			
+			IF(ISFILTERED('Date'[Month]) || ISFILTERED('Date'[DateMoM]),
+			                SELECTEDVALUE('Date'[Month]) & ": ",
+			                "Total Sales : "
+			            )
 		displayFolder: MoM
 		lineageTag: 51bc92c4-3c21-464e-91ee-8951bdcff1a0
 
 	measure 'Previous Month Label' =
-			IF(NOT (ISBLANK([Previous Month Sales])),
-			                        SELECTEDVALUE('Date'[PrevMonth]) & ": "
-			                )
+			
+			IF(ISFILTERED('Date'[Month]) || ISFILTERED('Date'[DateMoM]),
+			                SELECTEDVALUE('Date'[PrevMonth]) & ": ",
+			                " "
+			            )
 		displayFolder: MoM
 		lineageTag: 3cf87e51-2afa-4c01-a57f-a5480f6c42fe
 
@@ -194,6 +207,36 @@ table _Measures
 		lineageTag: 7ddee2e2-c046-466e-ba2e-a8e7b7d54a3f
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Top Product Summary' =
+			
+			VAR _TopProduct =
+			    TOPN(
+			        1,
+			        SUMMARIZE(Sales, Sales[Part_Nbr], "SalesValue", [Total Sales]),
+			        [SalesValue],
+			        DESC
+			    )
+			VAR _Product = MAXX(_TopProduct, Sales[Part_Nbr])
+			VAR _Value = MAXX(_TopProduct, [SalesValue])
+			RETURN
+			    "The Highest Sales is " & _Product & " " & FORMAT(_Value, "$#,##0.00")
+		displayFolder: Misc
+		lineageTag: 2dffd83b-0fc8-43df-ae49-4205491d10b9
+
+	measure 'Label Month Difference' = ```
+			
+			IF(ISFILTERED('Date'[Month]) || ISFILTERED('Date'[DateMoM]),
+			        "The Difference of Sales from the month of " & 
+			        FORMAT(EOMONTH(MAX('Date'[Date]), -1), "mmmm") &
+			        " to " & FORMAT(EOMONTH(MAX('Date'[Date]), 0), "mmmm") &
+			        " is " & [MoM],
+			
+			        BLANK()
+			    )
+			```
+		displayFolder: Misc
+		lineageTag: 3175b28b-a57a-459d-afb8-7b6b6ac75ff7
 
 	partition _Measures = m
 		mode: import
