@@ -71,14 +71,34 @@ table Date
 
 		annotation SummarizationSetBy = Automatic
 
+	column MonthYear
+		lineageTag: 34893097-991d-4afc-9ed3-4e422eeb46a2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthYear]
+		sortByColumn: MonthYearSort
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthYearSort
+		formatString: 0
+		lineageTag: 05b7be08-a8f8-4704-b8e7-b06af58892bc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthYearSort]
+
+		annotation SummarizationSetBy = Automatic
+
 	partition Date = calculated
 		mode: import
 		source =
-				VAR _cal = CALENDARAUTO()
+				VAR _cal = CALENDAR(MIN(Sales[So_Date]), EOMONTH(MAX(Sales[So_Date]), 3))
 				        RETURN
 				            ADDCOLUMNS(_cal,
 				                "MonthNumber", MONTH([Date]),
 				                "Month", FORMAT([Date], "mmm"),
+				                "MonthYear", FORMAT([Date], "mmm YYYY"),
+				                "MonthYearSort", YEAR([Date]) * 100 + MONTH([Date]),
 				                "PrevMonth", FORMAT(EOMONTH([Date], -1), "mmm"),
 				                "Quarter", QUARTER([Date]),
 				                "Year", YEAR([Date]),

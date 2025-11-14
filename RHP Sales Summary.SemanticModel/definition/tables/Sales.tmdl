@@ -96,9 +96,10 @@ table Sales
 				    #"Added Profit" = Table.AddColumn(#"Added Column Discount", "Profit", each [Sales Amount] - [Cost]),
 				    #"Removed Columns ID,Trade_Disc_Amount,Last_Bk_Cost" = Table.RemoveColumns(#"Added Profit",{"ID", "Trade_Disc_Amount", "Last_Bk_Cost"}),
 				    #"Removed 0 on Sales Amount" = Table.SelectRows(#"Removed Columns ID,Trade_Disc_Amount,Last_Bk_Cost", each ([Sales Amount] <> 0)),
-				    #"Changed Type" = Table.TransformColumnTypes(#"Removed 0 on Sales Amount",{{"Cost", type number}, {"Discount", type number}, {"Profit", type number}, {"So_Date", type datetime}})
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed 0 on Sales Amount",{{"Cost", type number}, {"Discount", type number}, {"Profit", type number}, {"So_Date", type datetime}}),
+				    #"Filtered Year" = Table.SelectRows(#"Changed Type", each [So_Date] > #datetime(2023, 1, 1, 0, 0, 0))
 				in
-				    #"Changed Type"
+				    #"Filtered Year"
 
 	annotation PBI_NavigationStepName = Navigation
 

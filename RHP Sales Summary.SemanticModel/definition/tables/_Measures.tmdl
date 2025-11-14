@@ -238,6 +238,227 @@ table _Measures
 		displayFolder: Misc
 		lineageTag: 3175b28b-a57a-459d-afb8-7b6b6ac75ff7
 
+	measure 'Forecast (3-Month Rolling)' = ```
+			
+			VAR _lastActualDate =
+			    CALCULATE(
+			        MAX(Sales[So_Date]),
+			        REMOVEFILTERS(Sales)
+			    )
+			
+			VAR _forecastDate = MAX('Date'[Date])
+			
+			-- Determine how many months ahead the current date is
+			VAR _monthsAhead =
+			    DATEDIFF(
+			        _lastActualDate,
+			        _forecastdate,
+			        MONTH
+			    )      
+			    
+			-- Recursive-style loop simulation
+			-- If 1 month ahead → use base forecast
+			-- If >1 → use rolling average of previous 3 (mix of actual + forecast)
+			VAR _forecast =
+			    SWITCH(
+			        TRUE(),
+			        [Month Difference] = 1, [1st Forecast] ,
+			
+			        [Month Difference] = 2,[2nd Forecast],
+			                
+			        [Month Difference] = 3,[3rd Forecast],
+			                
+			        [Total Sales]
+			        )
+			
+			    
+			
+			RETURN
+			--IF(_isFutureMonth, _forecast)
+			_forecast
+			```
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Forecast\Rolling
+		lineageTag: c833d1c6-9fe6-4e4e-ac8f-095d16661517
+
+	measure 'Total Sales 3-Month Avg' = ```
+			
+			 VAR _prevmonth = CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -4) + 1
+			                        )
+			RETURN
+			        DIVIDE(_prevmonth,
+			                3
+			            )
+			```
+		displayFolder: Forecast\Rolling
+		lineageTag: 5c8f7e1c-63f8-4e97-8aad-44a35ed6f776
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Month Difference' = ```
+			
+			VAR _lastActualDate = 
+			    CALCULATE(MAX(Sales[So_Date]), REMOVEFILTERS(Sales))
+			
+			VAR _forecastDate = MAX('Date'[Date])
+			
+			-- Determine how many months ahead the current date is
+			VAR _monthsAhead =
+			    DATEDIFF(_lastActualDate, _forecastdate, MONTH)   
+			    
+			RETURN
+			    _monthsAhead
+			```
+		formatString: 0
+		displayFolder: Forecast\Rolling
+		lineageTag: 8858e175-a138-4865-8fa5-473cc1233a8a
+
+	measure '1st Forecast' = ```
+			
+			VAR _prev3months = CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -4) + 1
+			                            )
+			RETURN
+			DIVIDE(_prev3months, 3)
+			```
+		displayFolder: Forecast\Rolling
+		lineageTag: 983b733b-95db-4857-82bb-456bf4352855
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales 3 Month' = ```
+			CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -4) + 1)
+			```
+		displayFolder: Forecast\Rolling
+		lineageTag: 6867c5c7-86e0-4069-8619-0c1eef07aaf1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '2nd Forecast' = ```
+			
+			VAR _prev4months = CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -5) + 1
+			                            )
+			VAR _salesavg = DIVIDE(_prev4months, 3) 
+			
+			RETURN
+			DIVIDE(_salesavg + [Total Sales 3 Month], 3)
+			```
+		displayFolder: Forecast\Rolling
+		lineageTag: f77d6ef9-0d71-49bf-8f92-29914325e3ed
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '3rd Forecast' = ```
+			
+			VAR _prev4months = CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -5) + 1)
+			
+			VAR _prev5months = CALCULATE([Total Sales],
+			                            ALLSELECTED(Sales), 
+			                            'Date'[Date] >= EOMONTH(MAX('Date'[Date]), -6) + 1
+			                            )
+			
+			VAR _sale2ndsavg = DIVIDE( _prev4months, 3)
+			VAR _sales3rdavg = DIVIDE(_prev5months,3)
+			VAR _totalavg = DIVIDE(_prev4months + _sales3rdavg, 3)
+			
+			RETURN
+			DIVIDE(_sales3rdavg + _totalavg + [Total Sales 3 Month], 3)
+			```
+		displayFolder: Forecast\Rolling
+		lineageTag: bf4fae92-6dcf-4ddd-be17-37518cc548bd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Top Customer Summary' =
+			
+			VAR _TopCustomer =
+			    TOPN(
+			        1,
+			        SUMMARIZE(Sales, Customer[Name], "SalesValue", [Total Sales]),
+			        [SalesValue],
+			        DESC
+			    )
+			VAR _Customer = MAXX(_TopCustomer, Customer[Name])
+			VAR _Value = MAXX(_TopCustomer, [SalesValue])
+			RETURN
+			    "The Top customer is " & _Customer & " with sales of " & FORMAT(_Value, "$#,##0.00")
+		displayFolder: Misc
+		lineageTag: 823b30d0-5f74-44f2-8038-759779d65028
+
+	measure 'Forecast YoY' =
+			
+			VAR _lastActualDate =
+			    CALCULATE(MAX(Sales[So_Date]), ALL(Sales))
+			
+			VAR _currentDate =
+			    MAX('Date'[Date])
+			
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    [Month Difference] IN {1, 2, 3},
+			        CALCULATE(
+			            [Total Sales],
+			            SAMEPERIODLASTYEAR('Date'[Date])
+			                ),
+			    [Total Sales]
+			)
+		displayFolder: Forecast\YoY
+		lineageTag: c8d1abf7-e9ea-4a48-afc0-4fcaba04100d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Forecast YoY + Growth' = ```
+			
+			VAR _lastYearValue =
+			    CALCULATE(
+			        [Total Sales],
+			        SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+			
+			VAR _2YearsBackValue =
+			    CALCULATE(
+			        [Total Sales],
+			        DATEADD('Date'[Date],-2,YEAR)
+			    )
+			
+			VAR _growth = 
+			    DIVIDE(_lastYearValue + _2YearsBackValue, 2)
+			
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    [Month Difference] IN {1, 2, 3},
+			        _growth,
+			    [Total Sales]
+			)
+			```
+		displayFolder: Forecast\YoY
+		lineageTag: b54d622f-792d-490b-ace1-d12209c00611
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Label 3 Month Rolling Forecast' = "3 Months forecast from the average of previous 3  months sales"
+		displayFolder: Misc
+		lineageTag: adf6c4be-3663-4cff-b55f-fd170fdffb2b
+
+	measure 'Label Forecast YoY' = "3 Months forecast from the same period last year"
+		displayFolder: Misc
+		lineageTag: 604adfac-7e10-4c40-909b-8115c3a64800
+
+	measure 'Label Forecast YoY + Growth' = "3 Months forecast from the growth of the same period from the past 2 years"
+		displayFolder: Misc
+		lineageTag: c8b97ce5-f7b5-409c-9537-c7aba94a7f88
+
 	partition _Measures = m
 		mode: import
 		source =
