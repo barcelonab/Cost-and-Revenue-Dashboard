@@ -178,7 +178,7 @@ table _Measures
 		displayFolder: MoM
 		lineageTag: 3cf87e51-2afa-4c01-a57f-a5480f6c42fe
 
-	measure 'Sales Last Year' = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
+	measure 'Sales Last Year' = CALCULATE([Total Sales], 'Date'[Year] = YEAR(TODAY()) - 1)
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: YoY
 		lineageTag: 1baed34c-a44f-42f2-a753-1664099eafbf
@@ -458,6 +458,68 @@ table _Measures
 	measure 'Label Forecast YoY + Growth' = "3 Months forecast from the growth of the same period from the past 2 years"
 		displayFolder: Misc
 		lineageTag: c8b97ce5-f7b5-409c-9537-c7aba94a7f88
+
+	measure 'Highlight Max Sales Last Year' =
+			VAR _table = SUMMARIZE(ALL('Date'),
+			                                                       'Date'[Month],
+			                                                        "Summarize",
+			                                                        [Sales Last Year]
+			                                                    )
+			                                VAR _max = MAXX(_table, [Summarize])
+			
+			                                 RETURN
+			                                    IF([Sales Last Year] = _max, _max, BLANK())
+		displayFolder: YoY
+		lineageTag: c399dee5-f0ab-43dc-8231-c6cd5b5f4688
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Highlight Min Sales Last Year' =
+			VAR _table = SUMMARIZE(ALL('Date'),
+			                                                       'Date'[Month],
+			                                                        "Summarize",
+			                                                        [Sales Last Year]
+			                                                    )
+			                                VAR _min = MINX(_table, [Summarize])
+			
+			                                 RETURN
+			                                    IF([Sales Last Year] = _min, _min, BLANK())
+		displayFolder: YoY
+		lineageTag: a45d9de2-0ad6-4771-be5a-aa0bbb2ee4ec
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Highlight Max Sales This Year' =
+			VAR _table = SUMMARIZE(ALL('Date'),
+			                                                        'Date'[Month],
+			                                                        "Summarize",
+			                                                        [Sales This Year]
+			                                                    )
+			
+			                                VAR _max = MAXX(_table, [Summarize])
+			
+			                                RETURN
+			                                    IF([Sales This Year] = _max, _max, BLANK())
+		displayFolder: YoY
+		lineageTag: 23f868be-1b8d-4deb-8840-999890ff519f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Highlight Min Sales This Year' =
+			VAR _table = SUMMARIZE(ALL('Date'),
+			                                                        'Date'[Month],
+			                                                          "Summarize",
+			                                                          [Sales This Year]
+			                                                    )
+			
+			                                VAR _min = MINX(_table, [Summarize])
+			
+			                                RETURN
+			                                    IF([Sales This Year] = _min, _min, BLANK())
+		displayFolder: YoY
+		lineageTag: 37349be6-4692-49af-afdf-4780536d2cc2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	partition _Measures = m
 		mode: import

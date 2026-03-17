@@ -1,15 +1,6 @@
 table Sales
 	lineageTag: e5f2de38-34f7-41ec-a786-07cdc040ed88
 
-	column So_Date
-		dataType: dateTime
-		formatString: Long Date
-		lineageTag: 332cd3d5-f131-4117-993c-881b6bd5beca
-		summarizeBy: none
-		sourceColumn: So_Date
-
-		annotation SummarizationSetBy = Automatic
-
 	column Part_Nbr
 		dataType: string
 		lineageTag: b0afb0ec-0f7b-4ebd-bd52-22218fde63c0
@@ -26,40 +17,11 @@ table Sales
 
 		annotation SummarizationSetBy = Automatic
 
-	column Qty
-		dataType: int64
-		formatString: 0
-		lineageTag: 175e6bf7-3411-4177-8601-94d13639f0f1
-		summarizeBy: sum
-		sourceColumn: Qty
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Sales Amount'
-		dataType: double
-		lineageTag: b1859b4d-e6e6-4a0a-ba26-59b9adeedfc3
-		summarizeBy: sum
-		sourceColumn: Sales Amount
-
-		annotation SummarizationSetBy = Automatic
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column Cost
 		dataType: double
 		lineageTag: 647e74d7-9434-44b2-b4bb-e5b78c3f48d7
 		summarizeBy: sum
 		sourceColumn: Cost
-
-		annotation SummarizationSetBy = Automatic
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
-	column Discount
-		dataType: double
-		lineageTag: 617faeeb-1a18-4804-a8cb-6201272f6344
-		summarizeBy: sum
-		sourceColumn: Discount
 
 		annotation SummarizationSetBy = Automatic
 
@@ -83,23 +45,74 @@ table Sales
 
 		annotation SummarizationSetBy = Automatic
 
+	column Inv_So_Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 429787ff-52f7-431a-8830-ecc4e6c99797
+		summarizeBy: none
+		sourceColumn: Inv_So_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Sales_Desc
+		dataType: string
+		lineageTag: d4c30b95-1615-445a-85c2-ec88afcf6e59
+		summarizeBy: none
+		sourceColumn: Sales_Desc
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: a89b01d2-8519-4dc0-9961-cef290e6c62c
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sales Amount'
+		dataType: double
+		lineageTag: 385c2e49-8692-43d5-a17d-12fb8c1d6d75
+		summarizeBy: sum
+		sourceColumn: Sales Amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Primary_Sales_Rep
+		dataType: string
+		lineageTag: 594958b9-eddc-4682-8604-bb40ccedeea0
+		summarizeBy: none
+		sourceColumn: Primary_Sales_Rep
+
+		annotation SummarizationSetBy = Automatic
+
+	column Comm_Amt
+		dataType: double
+		lineageTag: 2e3ff804-54f7-4794-80ec-7cf61322b9ad
+		summarizeBy: sum
+		sourceColumn: Comm_Amt
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	partition Sales = m
 		mode: import
 		source =
 				let
 				    Source = Sql.Databases(Server),
 				    ReportPBI = Source{[Name="ReportPBI"]}[Data],
-				    dbo_vw_SOD = ReportPBI{[Schema="dbo",Item="vw_SOD"]}[Data],
-				    #"Renamed Ln_Del_Qty,Ln_del_Ext_Price" = Table.RenameColumns(dbo_vw_SOD,{{"Ln_Del_Qty", "Qty"}, {"Ln_Del_Ext_Price", "Sales Amount"}}),
-				    #"Added Column Cost" = Table.AddColumn(#"Renamed Ln_Del_Qty,Ln_del_Ext_Price", "Cost", each [Last_Bk_Cost] * [Qty]),
-				    #"Added Column Discount" = Table.AddColumn(#"Added Column Cost", "Discount", each [Trade_Disc_Amount] * [Qty]),
-				    #"Added Profit" = Table.AddColumn(#"Added Column Discount", "Profit", each [Sales Amount] - [Cost]),
-				    #"Removed Columns ID,Trade_Disc_Amount,Last_Bk_Cost" = Table.RemoveColumns(#"Added Profit",{"ID", "Trade_Disc_Amount", "Last_Bk_Cost"}),
-				    #"Removed 0 on Sales Amount" = Table.SelectRows(#"Removed Columns ID,Trade_Disc_Amount,Last_Bk_Cost", each ([Sales Amount] <> 0)),
-				    #"Changed Type" = Table.TransformColumnTypes(#"Removed 0 on Sales Amount",{{"Cost", type number}, {"Discount", type number}, {"Profit", type number}, {"So_Date", type datetime}}),
-				    #"Filtered Year" = Table.SelectRows(#"Changed Type", each [So_Date] > #datetime(2023, 1, 1, 0, 0, 0))
+				    dbo_vw_Sales_Analysis = ReportPBI{[Schema="dbo",Item="vw_Sales_Analysis"]}[Data],
+				    #"Renamed Sales Column to Sales Amount" = Table.RenameColumns(dbo_vw_Sales_Analysis,{{"Sales", "Sales Amount"}}),
+				    #"Added Profit" = Table.AddColumn(#"Renamed Sales Column to Sales Amount", "Profit", each [Sales Amount] - [Cost]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Added Profit",{{"Profit", type number}})
 				in
-				    #"Filtered Year"
+				    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 

@@ -92,7 +92,7 @@ table Date
 	partition Date = calculated
 		mode: import
 		source =
-				VAR _cal = CALENDAR(MIN(Sales[So_Date]), EOMONTH(MAX(Sales[So_Date]), 3))
+				VAR _cal = CALENDAR(MIN(Sales[Inv_So_Date]), EOMONTH(MAX(Sales[Inv_So_Date]), 3))
 				        RETURN
 				            ADDCOLUMNS(_cal,
 				                "MonthNumber", MONTH([Date]),
